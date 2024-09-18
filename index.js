@@ -1,37 +1,34 @@
 const express = require("express");
-const app = express();
-const port = 3000;
 const { jsPDF } = require("jspdf");
-const bodyParser = require("body-parser");
+const path = require("path");
 
-app.use(bodyParser.json());
+const app = express();
+const port = process.env.PORT || 3000;
 
-function generatePDFWithDownloadableLink(content) {
-  try {
-    const doc = new jsPDF();
-    doc.setFontSize(10);
-    doc.text(content, 10, 10);
-    doc.save(`public/${new Date().toLocaleDateString("es-CL")}.pdf`);
-  } catch (error) {
-    console.error("Error:", error);
-    return null;
-  }
+app.use(express.json());
+app.use(express.static("public"));
+
+function generatePDF(content) {
+  const doc = new jsPDF();
+  doc.setFontSize(10);
+  doc.text(content, 10, 10);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const fileName = `${yesterday.toLocaleDateString("es-CL")}.pdf`;
+  const filePath = path.join("public", fileName);
+  doc.save(filePath);
+  return fileName;
 }
 
 app.post("/", (req, res) => {
-  console.log(req.body);
-
   const { content } = req.body;
-
-  generatePDFWithDownloadableLink(content);
-
-  res.send({
-    success: true,
-  });
+  try {
+    const fileName = generatePDF(content);
+    res.json({ success: true, fileName });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ success: false, error: "PDF generation failed" });
+  }
 });
 
-app.use(express.static("public"));
-
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`);
-});
+app.listen(port, () => console.log(`App listening on port ${port}`));

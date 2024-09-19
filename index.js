@@ -13,7 +13,7 @@ function generatePDF(content) {
   doc.setFontSize(10);
   doc.text(content, 10, 10);
   const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  // yesterday.setDate(yesterday.getDate());
   const fileName = `${yesterday.toLocaleDateString("es-CL")}.pdf`;
   const filePath = path.join("public", fileName);
   doc.save(filePath);

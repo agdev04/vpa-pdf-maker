@@ -14,11 +14,18 @@ function generatePDF(content) {
   doc.text(content, 10, 10);
   const yesterday = new Date();
   // yesterday.setDate(yesterday.getDate());
-  const fileName = `${yesterday.toLocaleDateString("es-CL")}.pdf`;
+  const fileName = `${formatDate(yesterday)}.pdf`;
   const filePath = path.join("public", fileName);
   doc.save(filePath);
   return fileName;
 }
+
+const formatDate = (date) => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
 app.post("/", (req, res) => {
   const { content } = req.body;
